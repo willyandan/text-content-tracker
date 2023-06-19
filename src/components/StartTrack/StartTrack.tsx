@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
+import { getTabs } from '../../service';
+import { initChain } from '../../service/blockChain';
+import { initFile } from '../../service/file';
 
 type Tab = {
   title: string;
@@ -11,23 +14,31 @@ export const StartTrack = () => {
   const [tab, setTab] = useState<Tab>();
 
   const getChromeTabs = useCallback(async () => {
-    const chromeTabs = await chrome.tabs.query({});
-    setTabs(
-      chromeTabs.map(({ title, id, url }) => ({
-        title: title || 'Aba sem nome',
-        id: id || 0,
-        url: url || '',
-      }))
-    );
+    const chromeTabs = await getTabs();
+    const tabs = chromeTabs.map(({ title, id, url }) => ({
+      title: title || 'Aba sem nome',
+      id: id || 0,
+      url: url || '',
+    }));
+    setTabs(tabs);
+    setTab(tabs[0]);
   }, []);
 
   useEffect(() => {
     getChromeTabs();
   }, [getChromeTabs]);
 
-  const handleSubmit = (prop: React.FormEvent<HTMLElement>) => {
+  const handleSubmit = async (prop: React.FormEvent<HTMLElement>) => {
     prop.preventDefault();
-    console.log(tab);
+    if (tab) {
+      const file = await initFile({
+        title: tab?.title,
+        date: new Date(),
+        url: tab?.url,
+      });
+      const blockHash = await initChain(file);
+      console.log(blockHash);
+    }
   };
 
   return (
@@ -56,7 +67,9 @@ export const StartTrack = () => {
               <select
                 id="password"
                 name="password"
-                onChange={prop => setTab(tabs[Number(prop.target.value)])}
+                onChange={prop => {
+                  setTab(tabs[Number(prop.target.value)]);
+                }}
                 required
                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               >

@@ -1,10 +1,10 @@
-import { GenerateTCTFile } from '../GenerateTCTFile';
+import { StartTrack } from '../StartTrack';
 import './App.css';
 
 export const App = () => {
   return (
     <div className="App">
-      <GenerateTCTFile></GenerateTCTFile>
+      <StartTrack></StartTrack>
     </div>
   );
 };
