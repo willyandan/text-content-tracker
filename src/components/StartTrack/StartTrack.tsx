@@ -1,4 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import { componentContext } from '../../context/components';
+import { getFiles, getTabs, initChain, initFile } from '../../service';
+import { sanitizeUrl } from '../../utils';
 
 type Tab = {
   title: string;
@@ -9,25 +12,51 @@ type Tab = {
 export const StartTrack = () => {
   const [tabs, setTabs] = useState<Array<Tab>>([]);
   const [tab, setTab] = useState<Tab>();
+  const [isTabFile, setIsTabFile] = useState<boolean>(false);
+  const { setFile } = useContext(componentContext);
 
   const getChromeTabs = useCallback(async () => {
-    const chromeTabs = await chrome.tabs.query({});
-    setTabs(
-      chromeTabs.map(({ title, id, url }) => ({
-        title: title || 'Aba sem nome',
-        id: id || 0,
-        url: url || '',
-      }))
-    );
+    const chromeTabs = await getTabs();
+    const tabs = chromeTabs.map(({ title, id, url }) => ({
+      title: title || 'Aba sem nome',
+      id: id || 0,
+      url: url || '',
+    }));
+    setTabs(tabs);
+    setTab(tabs[0]);
   }, []);
 
   useEffect(() => {
     getChromeTabs();
   }, [getChromeTabs]);
 
-  const handleSubmit = (prop: React.FormEvent<HTMLElement>) => {
+  const handleSubmit = async (prop: React.FormEvent<HTMLElement>) => {
     prop.preventDefault();
-    console.log(tab);
+    if (tab) {
+      const file = await initFile({
+        title: tab?.title,
+        date: new Date(),
+        url: tab?.url,
+      });
+      await initChain(file);
+    }
+  };
+
+  const handleChangeTab = async (
+    prop: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const tab = tabs[Number(prop.target.value)];
+    setTab(tab);
+    const files = await getFiles();
+    const url = tab.url || '';
+    const sanitizedUrl = sanitizeUrl(url);
+    const isFileTab = files.some(file => file.url === sanitizedUrl);
+    setIsTabFile(isFileTab);
+  };
+
+  const handleDownloadFile = () => {
+    const url = sanitizeUrl(tab?.url || '');
+    setFile(url);
   };
 
   return (
@@ -56,7 +85,7 @@ export const StartTrack = () => {
               <select
                 id="password"
                 name="password"
-                onChange={prop => setTab(tabs[Number(prop.target.value)])}
+                onChange={handleChangeTab}
                 required
                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               >
@@ -70,12 +99,22 @@ export const StartTrack = () => {
           </div>
 
           <div>
-            <button
-              type="submit"
-              className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
-              Começar
-            </button>
+            {isTabFile ? (
+              <button
+                type="button"
+                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                onClick={handleDownloadFile}
+              >
+                Baixar arquivo
+              </button>
+            ) : (
+              <button
+                type="submit"
+                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              >
+                Começar
+              </button>
+            )}
           </div>
         </form>
       </div>

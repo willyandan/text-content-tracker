@@ -11,6 +11,7 @@
     "@types/node": "^16.18.35",
     "@types/react": "^18.2.12",
     "@types/react-dom": "^18.2.5",
+    "crypto-js": "^4.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
@@ -20,6 +21,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "INLINE_RUNTIME_CHUNK=false craco build",
+    "lint": "eslint --fix",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -43,6 +45,7 @@
   },
   "devDependencies": {
     "@types/chrome": "^0.0.237",
+    "@types/crypto-js": "^4.1.1",
     "@typescript-eslint/eslint-plugin": "^5.59.11",
     "@typescript-eslint/parser": "^5.59.11",
     "eslint": "^8.42.0",
