@@ -8,6 +8,5 @@ export type BlockContent = {
   content: string;
   hasPasteContent: boolean;
   pasteContentOrigin?: string;
-  dateStart: Date;
-  dateEnd: Date;
+  date: Date;
 };

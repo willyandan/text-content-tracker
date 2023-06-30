@@ -6,9 +6,9 @@ export const connectDb = async (dbName: string): Promise<IDBDatabase> => {
       switch (event.oldVersion) {
         case 0:
           db.createObjectStore('blocks', { keyPath: 'lastBlockHash' });
+          db.createObjectStore('files', { keyPath: 'url' });
           break;
       }
-      resolve(db);
     };
     request.onsuccess = () => {
       resolve(request.result);
@@ -33,17 +33,30 @@ export const insertOnDB = <T>(db: IDBDatabase, tableName: string, item: T) => {
   });
 };
 
-export const getOnDb = async <T>(
-  db: IDBDatabase,
-  tableName: string,
-  key: string
-): Promise<T> => {
+export const updateOnDb = <T>(db: IDBDatabase, tableName: string, item: T) => {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(tableName, 'readwrite');
     const blocks = transaction.objectStore(tableName);
-    const request = blocks.getKey(key);
+    const request = blocks.put(item);
     request.onsuccess = () => {
-      resolve(request.result as T);
+      resolve(request.result);
+    };
+    request.onerror = () => {
+      reject(request.error);
+    };
+  });
+};
+
+export const getAll = async <T>(
+  db: IDBDatabase,
+  tableName: string
+): Promise<Array<T>> => {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(tableName, 'readonly');
+    const blocks = transaction.objectStore(tableName);
+    const request = blocks.getAll();
+    request.onsuccess = () => {
+      resolve(request.result as Array<T>);
     };
     request.onerror = () => {
       reject(request.error);

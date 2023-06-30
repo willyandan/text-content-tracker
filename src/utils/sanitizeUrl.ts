@@ -1,9 +1,9 @@
 const removeProtocol = (url: string) => {
-  return url.replace('https', '').replace('http', '');
+  return url.replace(/.+:\/\//, '');
 };
 
 const removeParams = (url: string) => {
-  return url.split('?')[0];
+  return url.replace(/(#|\?).+/, '');
 };
 
 export const sanitizeUrl = (url: string) => {
