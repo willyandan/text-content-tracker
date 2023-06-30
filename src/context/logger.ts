@@ -2,6 +2,7 @@ export type LoggerState = {
   tabId: number;
   isTabActive: boolean;
   lastBodyHash?: string;
+  isPasteEvent?: boolean;
   isFileTab: boolean;
 };
 
@@ -12,7 +13,7 @@ export interface LoggerMutation {
     port: chrome.runtime.Port
   ) => LoggerState;
   UPDATE_LAST_BODY_HASH: (
-    payload: { lastBodyHash: string },
+    payload: { lastBodyHash: string; isPasteEvent: false },
     props: LoggerState,
     port: chrome.runtime.Port
   ) => LoggerState;

@@ -40,7 +40,7 @@ export const GenerateTCTFile = ({ url }: { url: string }) => {
         <b>Nome do arquivo:</b> {file.name}
       </p>
       <p className="text-left">
-        <b>Data de criação:</b> {file.date.toISOString()}
+        <b>Data de criação:</b> {file.date.toLocaleDateString()}
       </p>
       <br />
       <button

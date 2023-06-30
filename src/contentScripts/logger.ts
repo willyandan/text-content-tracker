@@ -9,6 +9,7 @@ const context: Context<LoggerState, LoggerMutation> = {
     isTabActive: false,
     lastBodyHash: '',
     isFileTab: false,
+    isPasteEvent: false,
   },
   mutation: {
     SETUP_CONTENT: (payload, props) => {
@@ -25,8 +26,8 @@ const context: Context<LoggerState, LoggerMutation> = {
       };
     },
     UPDATE_LAST_BODY_HASH(payload, props, port) {
-      const { lastBodyHash } = payload;
-      return { ...props, lastBodyHash };
+      const { lastBodyHash, isPasteEvent } = payload;
+      return { ...props, lastBodyHash, isPasteEvent };
     },
   },
 };
@@ -58,10 +59,9 @@ const handlePaste = () => {
   if (context.props.isFileTab) {
     const body = document.body.innerText;
     const actualHash = simpleHash(body);
-    sendFullBody({ body, pasteEvent: true }, port);
     mutateContext({
       action: 'UPDATE_LAST_BODY_HASH',
-      payload: { lastBodyHash: actualHash },
+      payload: { lastBodyHash: actualHash, isPasteEvent: true },
     });
   }
 };
@@ -75,10 +75,13 @@ const main = (props: LoggerState) => {
         const body = document.body.innerText;
         const actualHash = simpleHash(body);
         if (actualHash !== context.props.lastBodyHash) {
-          sendFullBody({ body, pasteEvent: false }, port);
+          sendFullBody(
+            { body, pasteEvent: context.props.isPasteEvent || false },
+            port
+          );
           mutateContext({
             action: 'UPDATE_LAST_BODY_HASH',
-            payload: { lastBodyHash: actualHash },
+            payload: { lastBodyHash: actualHash, isPasteEvent: false },
           });
         }
       }
